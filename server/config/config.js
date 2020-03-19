@@ -29,15 +29,11 @@ process.env.SEED = process.env.SEED || 'este-es-el-seed-desarrollo';
 let urlBD;
 
 if (process.env.NODE_ENV === "dev") {
-    urlBD = 'mongodb://localhost:27017/cafe';
+    urlBD = 'mongodb+srv://hdrm:FiSneZOLniXME81O@cluster0-lisg6.mongodb.net/fv?retryWrites=true&w=majority';
+    //urlBD = 'mongodb://localhost:27017/cafe';
 } else {
-    urlBD = process.env.MONGO_URI;
+    urlBD = 'mongodb+srv://hdrm:FiSneZOLniXME81O@cluster0-lisg6.mongodb.net/fv?retryWrites=true&w=majority';
+    // urlBD = process.env.MONGO_URI;
 }
 
 process.env.URLBD = urlBD;
-
-//==========================================
-//  Google Client ID
-//==========================================
-
-process.env.CLIENT_ID = process.env.CLIENT_ID || '738100415458-53j18g6cviasvlfmnepunvnugh1v400a.apps.googleusercontent.com';
