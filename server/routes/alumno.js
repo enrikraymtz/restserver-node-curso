@@ -68,59 +68,70 @@ app.post('/usuario', [verificaToken, verificaAdmin_Role], function(req, res) {
 
 app.post('/api/tienda/aviso', function(req, res) {
     let body = req.body;
-    console.log(body);
-    let usuario = new Usuario({
-        matricula: decript(body.matricula),
-        nombre: decript(body.nombre),
-        campus: decript(body.campus),
-        montoInicial: decript(body.montoInicial),
-        cantidad: decript(body.cantidad),
-        cveTienda: decript(body.cveTienda),
-        tipoMoneda: decript(body.tipoMoneda),
-        servicio: decript(body.servicio),
-        pedido: decript(body.pedido),
-        folioTienda: decript(body.folioTienda),
-        cveFormaPago: decript(body.cveFormaPago),
-        descFormaPago: decript(body.descFormaPago),
-        tipoTransaccion: decript(body.tipoTransaccion),
-        estatus: decript(body.estatus),
-        opcional: decript(body.opcional),
-        q: body.q
-    });
+    
+    let objDes = {};
+    var url = 'https://prd23gp04.itesm.mx:8080/EncripcionService/Encripcion?wsdl';
 
-    console.log(usuario);
-
-    usuario.save((err, usuarioDB) => {
-        if (err) {
-            return res.status(400).json({
-                ok: false,
-                err
-            });
+    Object.entries(body).forEach(([key, value]) => {
+        console.log(key + ' ' + value);
+        if ( key === "q" ) {
+            objDes[key] = 1;
+        } else {
+            var args = {arg0: value};
+            soap.createClient(url, function(err, client) {
+                client.descifraLlaveHex(args, function(err, result) {
+                    objDes[key] = result.return;
+                });
+            });  
         }
-
-        usuarioDB.password = null;
-
-        res.json({
-            ok: true,
-            usuario: usuarioDB
-        });
     });
+
+    setTimeout(() => {
+        console.log(objDes);
+   
+        let usuario = new Usuario({
+            matricula: objDes.matricula,
+            nombre: objDes.nombre,
+            campus: objDes.campus,
+            montoInicial: objDes.montoInicial,
+            cantidad: objDes.cantidad,
+            cveTienda: objDes.cveTienda,
+            tipoMoneda: objDes.tipoMoneda,
+            servicio: objDes.servicio,
+            pedido: objDes.pedido,
+            folioTienda: objDes.folioTienda,
+            cveFormaPago: objDes.cveFormaPago,
+            descFormaPago: objDes.descFormaPago,
+            tipoTransaccion: objDes.tipoTransaccion,
+            estatus: objDes.estatus,
+            opcional: objDes.opcional,
+            q: body.q
+        });
+    
+        console.log(usuario);
+    
+        usuario.save((err, usuarioDB) => {
+            if (err) {
+                return res.status(400).json({
+                    ok: false,
+                    err
+                });
+            }
+    
+            usuarioDB.password = null;
+    
+            res.json({
+                ok: true,
+                usuario: usuarioDB
+            });
+        });
+    }, 5000);
 
 });
 
 function decript (data, res) {
     // console.log(data);
-    var url = 'https://prod023ms04.itesm.mx:8080/EncripcionService/Encripcion?wsdl';
-    var args = {arg0: data};
-    soap.createClient(url, function(err, client) {
-        console.log(client);
-        client.descifra_llave_hex(args, function(err, result) {
-            console.log(result);
-            console.log(err);
-            res = result;
-            return res;
-        });
-    });  
+    
 };
 
 module.exports = app;
